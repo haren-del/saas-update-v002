@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "./prisma"
 import bcrypt from "bcryptjs"
@@ -7,6 +8,13 @@ import bcrypt from "bcryptjs"
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
   providers: [
+    // Google OAuth Provider - ADD THIS!
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
+    
+    // Email/Password Provider
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -18,7 +26,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials")
         }
 
-        // Find user in Neon database
+        // Find user in database
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         })
@@ -49,9 +57,9 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id
-        session.user.email = token.email
+      if (token && session.user) {
+        session.user.id = token.id as string
+        session.user.email = token.email as string
       }
       return session
     },

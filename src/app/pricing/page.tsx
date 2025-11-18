@@ -11,94 +11,108 @@ export default function PricingPage() {
 
   // ... your plans object here ...
 const plans = {
-    monthly: [
-      {
-        name: "Starter",
-        price: "$9",
-        period: "/month",
-        features: [
-          "10 invoices per month",
-          "PDF download",
-          "Email sending",
-          "Basic templates",
-          "Email support"
-        ],
-      },
-      {
-        name: "Professional",
-        price: "$29",
-        period: "/month",
-        features: [
-          "Unlimited invoices",
-          "PDF download",
-          "Email sending",
-          "Premium templates",
-          "Priority support",
-          "Custom branding",
-          "Analytics dashboard"
-        ],
-        popular: true
-      },
-      {
-        name: "Enterprise",
-        price: "$99",
-        period: "/month",
-        features: [
-          "Everything in Professional",
-          "Multiple team members",
-          "API access",
-          "Custom integrations",
-          "Dedicated support",
-          "White-label solution"
-        ],
-      }
-    ],
-    yearly: [
-      {
-        name: "Starter",
-        price: "$90",
-        period: "/year",
-        savings: "Save $18",
-        features: [
-          "10 invoices per month",
-          "PDF download",
-          "Email sending",
-          "Basic templates",
-          "Email support"
-        ],
-      },
-      {
-        name: "Professional",
-        price: "$290",
-        period: "/year",
-        savings: "Save $58",
-        features: [
-          "Unlimited invoices",
-          "PDF download",
-          "Email sending",
-          "Premium templates",
-          "Priority support",
-          "Custom branding",
-          "Analytics dashboard"
-        ],
-        popular: true
-      },
-      {
-        name: "Enterprise",
-        price: "$990",
-        period: "/year",
-        savings: "Save $198",
-        features: [
-          "Everything in Professional",
-          "Multiple team members",
-          "API access",
-          "Custom integrations",
-          "Dedicated support",
-          "White-label solution"
-        ],
-      }
-    ]
-  };
+  monthly: [
+    {
+      id: 'free',
+      name: "Free",
+      price: "$0",
+      period: "/forever",
+      description: "Perfect for trying out",
+      features: [
+        "3 invoices per month",
+        "2 quotations per month",
+        "1 basic template",
+        "PDF with watermark",
+        "Email support"
+      ],
+    },
+    {
+      name: "Starter",
+      price: "$9",
+      period: "/month",
+      features: [
+        "10 invoices per month",
+        "PDF download",
+        "Email sending",
+        "Basic templates",
+        "Email support"
+      ],
+    },
+    {
+      name: "Professional",
+      price: "$29",
+      period: "/month",
+      features: [
+        "Unlimited invoices",
+        "PDF download",
+        "Email sending",
+        "Premium templates",
+        "Priority support",
+        "Custom branding",
+        "Analytics dashboard"
+      ],
+      popular: true
+    },
+    {
+      name: "Enterprise",
+      price: "$99",
+      period: "/month",
+      features: [
+        "Everything in Professional",
+        "Multiple team members",
+        "API access",
+        "Custom integrations",
+        "Dedicated support",
+        "White-label solution"
+      ],
+    }
+  ],
+  yearly: [
+    {
+      name: "Starter",
+      price: "$90",
+      period: "/year",
+      savings: "Save $18",
+      features: [
+        "10 invoices per month",
+        "PDF download",
+        "Email sending",
+        "Basic templates",
+        "Email support"
+      ],
+    },
+    {
+      name: "Professional",
+      price: "$290",
+      period: "/year",
+      savings: "Save $58",
+      features: [
+        "Unlimited invoices",
+        "PDF download",
+        "Email sending",
+        "Premium templates",
+        "Priority support",
+        "Custom branding",
+        "Analytics dashboard"
+      ],
+      popular: true
+    },
+    {
+      name: "Enterprise",
+      price: "$990",
+      period: "/year",
+      savings: "Save $198",
+      features: [
+        "Everything in Professional",
+        "Multiple team members",
+        "API access",
+        "Custom integrations",
+        "Dedicated support",
+        "White-label solution"
+      ],
+    }
+  ]
+};
 
   return (
     <main className="min-h-screen bg-[#fcfcfc]">

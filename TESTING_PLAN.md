@@ -1,0 +1,11 @@
+## Testing Checklist
+- [ ] Test free plan limits
+- [ ] Test all payment flows
+- [ ] Test email delivery
+- [ ] Test Google OAuth
+- [ ] Test dark mode on all pages
+- [ ] Test quotation conversion
+- [ ] Test all invoice templates
+- [ ] Mobile responsiveness
+- [ ] Browser compatibility
+- [ ] Performance testing
