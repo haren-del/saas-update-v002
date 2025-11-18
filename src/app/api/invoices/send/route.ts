@@ -3,7 +3,14 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendInvoiceEmail } from '@/lib/email';
-import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
+import React from 'react';
+
+interface InvoiceItem {
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
 
 export async function POST(req: Request) {
   try {
@@ -37,105 +44,132 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // Generate PDF
-    const pdfDoc = (
-      <Document>
-        <Page size="A4" style={styles.page}>
-          <View style={styles.header}>
-            <Text style={styles.title}>INVOICE</Text>
-            <Text style={styles.invoiceNumber}>#{invoice.invoiceNumber}</Text>
-          </View>
+    // Generate PDF using React.createElement (avoid JSX in API routes)
+    const ReactPDF = await import('@react-pdf/renderer');
+    const { Document, Page, Text, View, StyleSheet, pdf } = ReactPDF;
 
-          <View style={styles.section}>
-            <View style={styles.row}>
-              <View style={styles.col}>
-                <Text style={styles.label}>From:</Text>
-                <Text style={styles.text}>{invoice.fromName}</Text>
-                <Text style={styles.text}>{invoice.fromEmail}</Text>
-                {invoice.fromAddress && <Text style={styles.text}>{invoice.fromAddress}</Text>}
-                {invoice.fromCity && <Text style={styles.text}>{invoice.fromCity}</Text>}
-              </View>
+    const items = invoice.items as InvoiceItem[];
 
-              <View style={styles.col}>
-                <Text style={styles.label}>To:</Text>
-                <Text style={styles.text}>{invoice.toName}</Text>
-                <Text style={styles.text}>{invoice.toEmail}</Text>
-                {invoice.toAddress && <Text style={styles.text}>{invoice.toAddress}</Text>}
-                {invoice.toCity && <Text style={styles.text}>{invoice.toCity}</Text>}
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <View style={styles.row}>
-              <View style={styles.col}>
-                <Text style={styles.label}>Invoice Date:</Text>
-                <Text style={styles.text}>
-                  {new Date(invoice.invoiceDate).toLocaleDateString()}
-                </Text>
-              </View>
-              <View style={styles.col}>
-                <Text style={styles.label}>Due Date:</Text>
-                <Text style={styles.text}>
-                  {new Date(invoice.dueDate).toLocaleDateString()}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.table}>
-            <View style={styles.tableHeader}>
-              <Text style={[styles.tableCell, styles.descriptionCell]}>Description</Text>
-              <Text style={styles.tableCell}>Quantity</Text>
-              <Text style={styles.tableCell}>Price</Text>
-              <Text style={styles.tableCell}>Amount</Text>
-            </View>
-
-            {(invoice.items as any[]).map((item: any, index: number) => (
-              <View key={index} style={styles.tableRow}>
-                <Text style={[styles.tableCell, styles.descriptionCell]}>{item.description}</Text>
-                <Text style={styles.tableCell}>{item.quantity}</Text>
-                <Text style={styles.tableCell}>${item.price}</Text>
-                <Text style={styles.tableCell}>${item.amount}</Text>
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.totals}>
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Subtotal:</Text>
-              <Text style={styles.totalValue}>${invoice.subtotal.toFixed(2)}</Text>
-            </View>
-            {invoice.tax > 0 && (
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Tax:</Text>
-                <Text style={styles.totalValue}>${invoice.tax.toFixed(2)}</Text>
-              </View>
-            )}
-            {invoice.discount > 0 && (
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Discount:</Text>
-                <Text style={styles.totalValue}>-${invoice.discount.toFixed(2)}</Text>
-              </View>
-            )}
-            <View style={[styles.totalRow, styles.grandTotal]}>
-              <Text style={styles.totalLabel}>Total:</Text>
-              <Text style={styles.totalValue}>${invoice.total.toFixed(2)}</Text>
-            </View>
-          </View>
-
-          {invoice.notes && (
-            <View style={styles.notes}>
-              <Text style={styles.label}>Notes:</Text>
-              <Text style={styles.text}>{invoice.notes}</Text>
-            </View>
-          )}
-        </Page>
-      </Document>
+    const pdfDoc = React.createElement(
+      Document,
+      null,
+      React.createElement(
+        Page,
+        { size: 'A4', style: styles.page },
+        React.createElement(
+          View,
+          { style: styles.header },
+          React.createElement(Text, { style: styles.title }, 'INVOICE'),
+          React.createElement(Text, { style: styles.invoiceNumber }, `#${invoice.invoiceNumber}`)
+        ),
+        React.createElement(
+          View,
+          { style: styles.section },
+          React.createElement(
+            View,
+            { style: styles.row },
+            React.createElement(
+              View,
+              { style: styles.col },
+              React.createElement(Text, { style: styles.label }, 'From:'),
+              React.createElement(Text, { style: styles.text }, invoice.fromName),
+              React.createElement(Text, { style: styles.text }, invoice.fromEmail),
+              invoice.fromAddress && React.createElement(Text, { style: styles.text }, invoice.fromAddress),
+              invoice.fromCity && React.createElement(Text, { style: styles.text }, invoice.fromCity)
+            ),
+            React.createElement(
+              View,
+              { style: styles.col },
+              React.createElement(Text, { style: styles.label }, 'To:'),
+              React.createElement(Text, { style: styles.text }, invoice.toName),
+              React.createElement(Text, { style: styles.text }, invoice.toEmail),
+              invoice.toAddress && React.createElement(Text, { style: styles.text }, invoice.toAddress),
+              invoice.toCity && React.createElement(Text, { style: styles.text }, invoice.toCity)
+            )
+          )
+        ),
+        React.createElement(
+          View,
+          { style: styles.section },
+          React.createElement(
+            View,
+            { style: styles.row },
+            React.createElement(
+              View,
+              { style: styles.col },
+              React.createElement(Text, { style: styles.label }, 'Invoice Date:'),
+              React.createElement(Text, { style: styles.text }, new Date(invoice.invoiceDate).toLocaleDateString())
+            ),
+            React.createElement(
+              View,
+              { style: styles.col },
+              React.createElement(Text, { style: styles.label }, 'Due Date:'),
+              React.createElement(Text, { style: styles.text }, new Date(invoice.dueDate).toLocaleDateString())
+            )
+          )
+        ),
+        React.createElement(
+          View,
+          { style: styles.table },
+          React.createElement(
+            View,
+            { style: styles.tableHeader },
+            React.createElement(Text, { style: [styles.tableCell, styles.descriptionCell] }, 'Description'),
+            React.createElement(Text, { style: styles.tableCell }, 'Quantity'),
+            React.createElement(Text, { style: styles.tableCell }, 'Rate'),
+            React.createElement(Text, { style: styles.tableCell }, 'Amount')
+          ),
+          ...items.map((item, index) =>
+            React.createElement(
+              View,
+              { key: index, style: styles.tableRow },
+              React.createElement(Text, { style: [styles.tableCell, styles.descriptionCell] }, item.description),
+              React.createElement(Text, { style: styles.tableCell }, item.quantity.toString()),
+              React.createElement(Text, { style: styles.tableCell }, `$${item.rate.toFixed(2)}`),
+              React.createElement(Text, { style: styles.tableCell }, `$${item.amount.toFixed(2)}`)
+            )
+          )
+        ),
+        React.createElement(
+          View,
+          { style: styles.totals },
+          React.createElement(
+            View,
+            { style: styles.totalRow },
+            React.createElement(Text, { style: styles.totalLabel }, 'Subtotal:'),
+            React.createElement(Text, { style: styles.totalValue }, `$${invoice.subtotal.toFixed(2)}`)
+          ),
+          invoice.tax > 0 && React.createElement(
+            View,
+            { style: styles.totalRow },
+            React.createElement(Text, { style: styles.totalLabel }, 'Tax:'),
+            React.createElement(Text, { style: styles.totalValue }, `$${invoice.tax.toFixed(2)}`)
+          ),
+          invoice.discount > 0 && React.createElement(
+            View,
+            { style: styles.totalRow },
+            React.createElement(Text, { style: styles.totalLabel }, 'Discount:'),
+            React.createElement(Text, { style: styles.totalValue }, `-$${invoice.discount.toFixed(2)}`)
+          ),
+          React.createElement(
+            View,
+            { style: [styles.totalRow, styles.grandTotal] },
+            React.createElement(Text, { style: styles.totalLabel }, 'Total:'),
+            React.createElement(Text, { style: styles.totalValue }, `$${invoice.total.toFixed(2)}`)
+          )
+        ),
+        invoice.notes && React.createElement(
+          View,
+          { style: styles.notes },
+          React.createElement(Text, { style: styles.label }, 'Notes:'),
+          React.createElement(Text, { style: styles.text }, invoice.notes)
+        )
+      )
     );
 
     // Generate PDF buffer
-    const pdfBuffer = await pdf(pdfDoc).toBuffer();
+    const pdfBlob = await pdf(pdfDoc).toBlob();
+    const pdfBuffer = Buffer.from(await pdfBlob.arrayBuffer());
 
     // Send email with PDF attachment
     const emailResult = await sendInvoiceEmail({
@@ -159,7 +193,7 @@ export async function POST(req: Request) {
       message: 'Invoice sent successfully',
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Send invoice error:', error);
     return NextResponse.json(
       { error: 'Failed to send invoice' },

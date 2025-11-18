@@ -34,7 +34,7 @@ export async function GET() {
       currentMonth: usage.currentMonth,
       lastReset: usage.lastResetDate,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching usage:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

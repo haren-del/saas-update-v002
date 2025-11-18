@@ -3,6 +3,36 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import React from 'react';
 
+interface InvoiceItem {
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
+
+interface PDFInvoiceData {
+  invoiceNumber: string;
+  fromName: string;
+  fromEmail: string;
+  fromAddress?: string;
+  fromCity?: string;
+  fromCountry?: string;
+  toName: string;
+  toEmail: string;
+  toAddress?: string;
+  toCity?: string;
+  toCountry?: string;
+  invoiceDate: string;
+  dueDate: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  discount: number;
+  total: number;
+  notes?: string;
+  terms?: string;
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -11,7 +41,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const data = await req.json();
+    const data: PDFInvoiceData = await req.json();
+
+    // Validation
+    if (!data.invoiceNumber || !data.fromName || !data.toName || !data.items || data.items.length === 0) {
+      return NextResponse.json(
+        { error: 'Missing required invoice data' },
+        { status: 400 }
+      );
+    }
 
     // Dynamically import react-pdf/renderer
     const ReactPDF = await import('@react-pdf/renderer');
@@ -257,7 +295,7 @@ export async function POST(req: Request) {
         'Content-Disposition': `attachment; filename="${data.invoiceNumber}.pdf"`,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error generating PDF:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

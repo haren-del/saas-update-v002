@@ -23,7 +23,7 @@ export async function GET() {
     const result = await canUserCreateInvoice(user.id);
 
     return NextResponse.json(result);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error checking limit:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

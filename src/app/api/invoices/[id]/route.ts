@@ -6,8 +6,9 @@ import { prisma } from '@/lib/prisma';
 // GET - Fetch single invoice by ID
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -25,7 +26,7 @@ export async function GET(
 
     // Find the invoice
     const invoice = await prisma.invoice.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     // Check if invoice exists and belongs to the user
@@ -34,7 +35,7 @@ export async function GET(
     }
 
     return NextResponse.json(invoice);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching invoice:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -46,8 +47,9 @@ export async function GET(
 // PUT - Update existing invoice
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -67,7 +69,7 @@ export async function PUT(
 
     // Check if invoice exists and belongs to user
     const existingInvoice = await prisma.invoice.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingInvoice || existingInvoice.userId !== user.id) {
@@ -76,7 +78,7 @@ export async function PUT(
 
     // Update the invoice
     const invoice = await prisma.invoice.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         fromName: data.fromName,
         fromEmail: data.fromEmail,
@@ -131,7 +133,7 @@ export async function PUT(
     }
 
     return NextResponse.json(invoice);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating invoice:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -143,8 +145,9 @@ export async function PUT(
 // DELETE - Delete invoice
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const session = await getServerSession(authOptions);
 
@@ -162,7 +165,7 @@ export async function DELETE(
 
     // Check if invoice belongs to user
     const invoice = await prisma.invoice.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!invoice || invoice.userId !== user.id) {
@@ -171,11 +174,11 @@ export async function DELETE(
 
     // Delete the invoice
     await prisma.invoice.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Invoice deleted successfully' });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting invoice:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

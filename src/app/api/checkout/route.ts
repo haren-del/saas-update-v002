@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       message: 'LemonSqueezy integration pending approval',
       checkoutUrl: null 
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating checkout:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

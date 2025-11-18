@@ -4,6 +4,43 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { canUserCreateInvoice, incrementInvoiceCount } from '@/lib/usage';
 
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { canUserCreateInvoice, incrementInvoiceCount } from '@/lib/usage';
+
+interface InvoiceItem {
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
+
+interface CreateInvoiceData {
+  invoiceNumber: string;
+  fromName: string;
+  fromEmail: string;
+  fromAddress?: string;
+  fromCity?: string;
+  fromCountry?: string;
+  toName: string;
+  toEmail: string;
+  toAddress?: string;
+  toCity?: string;
+  toCountry?: string;
+  invoiceDate: string;
+  dueDate: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  discount: number;
+  total: number;
+  notes?: string;
+  terms?: string;
+  status?: string;
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -33,7 +70,15 @@ export async function POST(req: Request) {
       );
     }
 
-    const data = await req.json();
+    const data: CreateInvoiceData = await req.json();
+
+    // Validation
+    if (!data.invoiceNumber || !data.fromName || !data.fromEmail || !data.toName || !data.toEmail) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
 
     const invoice = await prisma.invoice.create({
       data: {
@@ -94,7 +139,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(invoice, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating invoice:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -125,7 +170,7 @@ export async function GET() {
     });
 
     return NextResponse.json(invoices);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching invoices:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

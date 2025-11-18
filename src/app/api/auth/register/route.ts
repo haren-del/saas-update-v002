@@ -4,7 +4,23 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const body = await req.json();
+    const { name, email, password } = body;
+
+    // Validation
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { error: 'Name, email, and password are required' },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 6) {
+      return NextResponse.json(
+        { error: 'Password must be at least 6 characters' },
+        { status: 400 }
+      );
+    }
 
     // Check if user already exists in Neon database
     const existingUser = await prisma.user.findUnique({
@@ -34,7 +50,8 @@ export async function POST(req: Request) {
       { message: 'User created successfully', userId: user.id },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
+    console.error('Registration error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -27,7 +27,7 @@ export async function GET() {
       plan: user.plan,
       planStatus: user.planStatus,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching user plan:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

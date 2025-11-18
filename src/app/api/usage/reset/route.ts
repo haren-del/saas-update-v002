@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+// Admin-only endpoint to reset usage for testing
+export async function POST() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -13,22 +14,38 @@ export async function GET() {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: {
-        plan: true,
-        planStatus: true,
-      }
     });
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json({
-      plan: user.plan,
-      planStatus: user.planStatus,
+    // Reset usage for the current month
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    
+    const usage = await prisma.usage.upsert({
+      where: { userId: user.id },
+      update: {
+        invoicesCount: 0,
+        quotationsCount: 0,
+        currentMonth,
+        lastResetDate: new Date(),
+      },
+      create: {
+        userId: user.id,
+        invoicesCount: 0,
+        quotationsCount: 0,
+        currentMonth,
+        lastResetDate: new Date(),
+      },
     });
-  } catch (error) {
-    console.error('Error fetching user plan:', error);
+
+    return NextResponse.json({ 
+      message: 'Usage reset successfully',
+      usage 
+    });
+  } catch (error: unknown) {
+    console.error('Error resetting usage:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
