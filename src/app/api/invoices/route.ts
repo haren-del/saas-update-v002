@@ -4,12 +4,6 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { canUserCreateInvoice, incrementInvoiceCount } from '@/lib/usage';
 
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
-import { canUserCreateInvoice, incrementInvoiceCount } from '@/lib/usage';
-
 interface InvoiceItem {
   description: string;
   quantity: number;

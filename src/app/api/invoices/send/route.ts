@@ -44,6 +44,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
+    // Check if user is on free plan
+    const isFreePlan = invoice.user.plan === 'free';
+
     // Generate PDF using React.createElement (avoid JSX in API routes)
     const ReactPDF = await import('@react-pdf/renderer');
     const { Document, Page, Text, View, StyleSheet, pdf } = ReactPDF;
@@ -163,6 +166,13 @@ export async function POST(req: Request) {
           { style: styles.notes },
           React.createElement(Text, { style: styles.label }, 'Notes:'),
           React.createElement(Text, { style: styles.text }, invoice.notes)
+        ),
+        // Watermark for Free Plan
+        isFreePlan && React.createElement(
+          View,
+          { style: styles.watermark },
+          React.createElement(Text, { style: styles.watermarkText }, '⚡ Generated with InvoiceGen - Free Plan'),
+          React.createElement(Text, { style: styles.watermarkSubtext }, 'Upgrade to remove watermark • invoicegen.com')
         )
       )
     );
@@ -296,5 +306,26 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: '#f9f9f9',
     borderRadius: 5,
+  },
+  // Watermark styles
+  watermark: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#e9eaea',
+  },
+  watermarkText: {
+    fontSize: 10,
+    color: '#fcc425',
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  watermarkSubtext: {
+    fontSize: 8,
+    color: '#bebebf',
   },
 });

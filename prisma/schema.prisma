@@ -19,6 +19,10 @@ model User {
   plan          String    @default("free") // free, starter, professional, enterprise
   planStatus    String    @default("active") // active, cancelled, expired
   
+  // Password reset
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   

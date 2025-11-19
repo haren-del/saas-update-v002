@@ -51,6 +51,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // Get user to check plan
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { plan: true }
+    });
+
+    const isFreePlan = !user || user.plan === 'free';
+
     // Dynamically import react-pdf/renderer
     const ReactPDF = await import('@react-pdf/renderer');
     const { Document, Page, Text, View, StyleSheet, pdf } = ReactPDF;
@@ -143,6 +151,27 @@ export async function POST(req: Request) {
       },
       sectionHeader: {
         marginBottom: 5,
+      },
+      // Watermark styles
+      watermark: {
+        position: 'absolute',
+        bottom: 20,
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+        paddingTop: 10,
+        borderTopWidth: 1,
+        borderTopColor: '#e9eaea',
+      },
+      watermarkText: {
+        fontSize: 10,
+        color: '#fcc425',
+        fontWeight: 'bold',
+        marginBottom: 2,
+      },
+      watermarkSubtext: {
+        fontSize: 8,
+        color: '#bebebf',
       },
     });
 
@@ -281,6 +310,15 @@ export async function POST(req: Request) {
             { style: styles.termsSection },
             React.createElement(Text, { style: styles.sectionHeader }, 'TERMS & CONDITIONS'),
             React.createElement(Text, null, data.terms)
+          ),
+
+        // Watermark for Free Plan
+        isFreePlan &&
+          React.createElement(
+            View,
+            { style: styles.watermark },
+            React.createElement(Text, { style: styles.watermarkText }, '⚡ Generated with InvoiceGen - Free Plan'),
+            React.createElement(Text, { style: styles.watermarkSubtext }, 'Upgrade to remove watermark • invoicegen.com')
           )
       )
     );
